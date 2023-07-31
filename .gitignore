@@ -5,3 +5,6 @@
 /.vs
 /RabbitMQClient/.vs/RabbitMQClient
 /RabbitMQClient/RabbitMQClient/obj
+/RabbitMQClient/RabbitMQClient/bin
+/RabbitMQClient/RabbitMQ.Consumer/bin
+/RabbitMQClient/RabbitMQ.Consumer/obj
