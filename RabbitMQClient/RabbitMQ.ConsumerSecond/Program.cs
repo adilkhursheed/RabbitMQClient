@@ -4,7 +4,7 @@ using RabbitMQ.Client.Events;
 using System.Text;
 using System.Threading.Channels;
 
-Console.WriteLine("Publisher 1 Message/2 Seconds!");
+Console.WriteLine("Hello Consumer.Second!");
 Console.WriteLine("******************************");
 
 ConnectionFactory factory = new ConnectionFactory();
@@ -13,35 +13,43 @@ factory.ClientProvidedName = "RabbitMQ Client Test";
 
 //using (var con = factory.CreateConnection())
 //{
+
 //    using (var model = con.CreateModel())
 //    {
-
-
 var con = factory.CreateConnection();
 var model = con.CreateModel();
+
 var exchangeName= "RabbitMQClientTest";
 var routingKey = "test-routing-key";
 var queueName= "TestQueue";
 
 model.ExchangeDeclare(exchangeName, ExchangeType.Direct);
 model.QueueDeclare(queue: queueName,
-    durable: false,
-    exclusive: false,
-    autoDelete: false,
-    arguments: null);
-model.QueueBind(queueName, exchangeName, routingKey);
+                     durable: false,
+                     exclusive: false,
+                     autoDelete: false,
+                     arguments: null);
 
-for (int i = 0; i < 50; i++)
+//model.BasicQos(0, 1, false);
+
+
+var consumer= new EventingBasicConsumer(model);
+consumer.Received += (object? sender, BasicDeliverEventArgs e) =>
 {
-    var messageText= $"Test Message {i}!";
-    var messageBody= Encoding.UTF8.GetBytes(messageText);
-    model.BasicPublish(exchangeName, routingKey, body: messageBody);
-    Console.WriteLine(messageText);
-    Thread.Sleep(TimeSpan.FromSeconds(2));
-}
+    var body= e.Body.ToArray();
+    var bodyText= Encoding.UTF8.GetString(body);
+
+    Console.WriteLine($"Message: {bodyText}");
+    model.BasicAck(e.DeliveryTag, false);
+    // Processing delay
+    Thread.Sleep(TimeSpan.FromSeconds(1));
+};
+
+var tag= model.BasicConsume(queueName,false,consumer);
+
+Console.ReadKey();
+//model.BasicCancel(tag);
 
 Console.WriteLine("Press any Key Exit");
 Console.ReadKey();
 
-model.Close();
-con.Close();

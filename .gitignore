@@ -2,9 +2,6 @@
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
-/.vs
-/RabbitMQClient/.vs/RabbitMQClient
-/RabbitMQClient/RabbitMQClient/obj
-/RabbitMQClient/RabbitMQClient/bin
-/RabbitMQClient/RabbitMQ.Consumer/bin
-/RabbitMQClient/RabbitMQ.Consumer/obj
+.vs
+bin
+obj

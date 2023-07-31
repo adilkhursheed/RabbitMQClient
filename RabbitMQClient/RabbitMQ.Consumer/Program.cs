@@ -4,7 +4,8 @@ using RabbitMQ.Client.Events;
 using System.Text;
 using System.Threading.Channels;
 
-Console.WriteLine("Hello, World!");
+Console.WriteLine("Hello Consumer!");
+Console.WriteLine("******************************");
 
 ConnectionFactory factory = new ConnectionFactory();
 factory.Uri = new Uri("amqp://guest:guest@localhost:5672");
@@ -17,14 +18,19 @@ factory.ClientProvidedName = "RabbitMQ Client Test";
 //    {
 var con = factory.CreateConnection();
 var model = con.CreateModel();
-var exchangeName= "RabbitMQ.PublisherTest";
+
+var exchangeName= "RabbitMQClientTest";
 var routingKey = "test-routing-key";
 var queueName= "TestQueue";
 
 model.ExchangeDeclare(exchangeName, ExchangeType.Direct);
-model.QueueDeclare(queueName);
-model.QueueBind(queueName, exchangeName, routingKey);
-model.BasicQos(0, 1, false);
+model.QueueDeclare(queue: queueName,
+                     durable: false,
+                     exclusive: false,
+                     autoDelete: false,
+                     arguments: null);
+
+//model.BasicQos(0, 1, false);
 
 
 var consumer= new EventingBasicConsumer(model);
@@ -35,6 +41,8 @@ consumer.Received += (object? sender, BasicDeliverEventArgs e) =>
 
     Console.WriteLine($"Message: {bodyText}");
     model.BasicAck(e.DeliveryTag, false);
+    // Processing delay
+    Thread.Sleep(TimeSpan.FromSeconds(1));
 };
 
 var tag= model.BasicConsume(queueName,false,consumer);
